@@ -1,0 +1,69 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.24"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "ECE5330",
+					"targetIndexes" : 
+					[
+						0,
+						1
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ECE5330::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ECE5330-Debug-161e45173f0ff1d838ef.json",
+					"name" : "ECE5330",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ECE5330_HW1::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ECE5330_HW1-Debug-6c4be085058bf6322d99.json",
+					"name" : "ECE5330_HW1",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/Users/matts/OneDrive - University of Iowa/Junior_Spring/GraphAlg/ECE5330/cmake-build-debug",
+		"source" : "C:/Users/matts/OneDrive - University of Iowa/Junior_Spring/GraphAlg/ECE5330"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}
