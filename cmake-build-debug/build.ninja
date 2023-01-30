@@ -41,39 +41,6 @@ include CMakeFiles/rules.ninja
 
 cmake_ninja_workdir = C$:/Users/matts/OneDrive$ -$ University$ of$ Iowa/Junior_Spring/GraphAlg/ECE5330/cmake-build-debug/
 # =============================================================================
-# Object build statements for EXECUTABLE target ECE5330
-
-
-#############################################
-# Order-only phony target for ECE5330
-
-build cmake_object_order_depends_target_ECE5330: phony || CMakeFiles/ECE5330.dir
-
-build CMakeFiles/ECE5330.dir/main.cpp.obj: CXX_COMPILER__ECE5330_Debug C$:/Users/matts/OneDrive$ -$ University$ of$ Iowa/Junior_Spring/GraphAlg/ECE5330/main.cpp || cmake_object_order_depends_target_ECE5330
-  DEP_FILE = CMakeFiles\ECE5330.dir\main.cpp.obj.d
-  FLAGS = -g -fdiagnostics-color=always -std=gnu++1z
-  OBJECT_DIR = CMakeFiles\ECE5330.dir
-  OBJECT_FILE_DIR = CMakeFiles\ECE5330.dir
-
-
-# =============================================================================
-# Link build statements for EXECUTABLE target ECE5330
-
-
-#############################################
-# Link the executable ECE5330.exe
-
-build ECE5330.exe: CXX_EXECUTABLE_LINKER__ECE5330_Debug CMakeFiles/ECE5330.dir/main.cpp.obj
-  FLAGS = -g
-  LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
-  OBJECT_DIR = CMakeFiles\ECE5330.dir
-  POST_BUILD = cd .
-  PRE_LINK = cd .
-  TARGET_FILE = ECE5330.exe
-  TARGET_IMPLIB = libECE5330.dll.a
-  TARGET_PDB = ECE5330.exe.dbg
-
-# =============================================================================
 # Object build statements for EXECUTABLE target ECE5330_HW1
 
 
@@ -138,8 +105,6 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # =============================================================================
 # Target aliases.
 
-build ECE5330: phony ECE5330.exe
-
 build ECE5330_HW1: phony ECE5330_HW1.exe
 
 # =============================================================================
@@ -150,7 +115,7 @@ build ECE5330_HW1: phony ECE5330_HW1.exe
 #############################################
 # Folder: C:/Users/matts/OneDrive - University of Iowa/Junior_Spring/GraphAlg/ECE5330/cmake-build-debug
 
-build all: phony ECE5330.exe ECE5330_HW1.exe
+build all: phony ECE5330_HW1.exe
 
 # =============================================================================
 # Built-in targets
