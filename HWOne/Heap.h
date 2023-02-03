@@ -13,7 +13,6 @@ public:
     void buildHeap();
     void checkHeapOrder();
     std::string printHeap();
-
 private:
     int size = 0;
     int* heapArray;

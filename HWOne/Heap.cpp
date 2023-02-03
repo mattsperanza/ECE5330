@@ -96,6 +96,3 @@ std::string Heap::printHeap()
     }
     return output;
 }
-
-
-
