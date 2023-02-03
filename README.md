@@ -6,5 +6,3 @@ First implementation will be in C++, then Python. Because of this order, the fil
 Descriptions of homeworks/projects and my grade/thoughts on the assignment listed after project is complete.
 
 ## Homework 1:
-
-
