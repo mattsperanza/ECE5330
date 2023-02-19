@@ -1,0 +1,343 @@
+1. Page 67: Problem 3
+    Take the following list of functions and arrange them in ascending order
+    of growth rate. That is, if function g(n) immediately follows function f(n)
+    in your list, then it should be the case that f(n) is O(g(n)).
+
+    f1(n) = n^(2.5)  # 4th
+    f2(n) = (2n)^(.5)  # 1st Fastest
+    f3(n) = n + 10  # 2nd
+    f4(n) = 10^n  # 5th
+    f5(n) = 100^n  # 6th Slowest
+    f6(n) = n^2 * log(n)  # 3rd
+
+ANSWER:
+f2, f3, f6, f1, f4, f5
+
+
+
+2. Page 68: Problem 6
+    Consider the following basic problem. You’re given an array A consisting
+    of n integers A[1], A[2], . . . , A[n]. You’d like to output a two-dimensional
+    n-by-n array B in which B[i, j] (for i < j) contains the sum of array entries
+    A[i] through A[j]—that is, the sum A[i]+ A[i + 1]+ ... + A[j]. (The value of
+    array entry B[i, j] is left unspecified whenever i ≥ j, so it doesn’t matter
+    what is output for these values.)
+
+    Here’s a simple algorithm to solve this problem.
+        For i = 1, 2, . . . , n
+            For j = i + 1, i + 2, . . . , n
+                Add up array entries A[i] through A[j]
+                Store the result in B[i, j]
+            Endfor
+        Endfor
+
+(a) For some function f that you should choose, give a bound of the
+    form O(f(n)) on the running time of this algorithm on an input of
+    size n (i.e., a bound on the number of operations performed by the
+    algorithm).
+
+ANSWER:
+Here is an analysis of the number of operations that are required for each line of pseudocode
+
+For i = 1, 2, . . . , n                          --> Runs n times O(n)
+    For j = i + 1, i + 2, . . . , n              --> Runs n times for n-i iterations
+        Add up array entries A[i] through A[j]   --> O(i) for the addition
+        Store the result in B[i, j]              --> O(1) for storing result
+    Endfor
+Endfor
+
+The program performs n*n operations because the outer loop runs n times and the inner loop performs n-i+i operations.
+The O(n^2) is the order of this program.
+
+
+
+(b) For this same function f, show that the running time of the algorithm
+    on an input of size n is also BigOmega(f(n)). (This shows an asymptotically
+    tight bound of BigTheta(f(n)) on the running time.)
+
+ANSWER:
+Because of the sum that is performed for the addition of the array entries, this program will always run with
+n^2 operations and cannot have a big omega with fewer operations.
+
+
+
+(c) Although the algorithm you analyzed in parts (a) and (b) is the most
+    natural way to solve the problem—after all, it just iterates through
+    the relevant entries of the array B, filling in a value for each—it
+    contains some highly unnecessary sources of inefficiency. Give a
+    different algorithm to solve this problem, with an asymptotically
+    better running time. In other words, you should design an algorithm
+    with running time O(g(n)), where lim(n→∞) g(n)/f(n) = 0.
+
+ANSWER:
+(Using new array C)
+For i = 1, 2, . . . , n     --> Runs n times O(n)
+    C[i] = C[i-1] + A[i]    --> O(1) for addition
+Endfor
+
+For i = 1, 2, . . . , n     --> Runs n times O(n)
+    B[i, :] = C[i:]         --> O(1) for assignment
+Endfor
+
+This algorithm performs n + n operations and has O(n).
+
+
+
+3. Consider  sorting  n  numbers  stored  in  array  A  by  first  finding  the  smallest
+   element of A and exchanging it with the element in A[1].  Then find the second-smallest
+   element  of  A,  and  exchange  it  with  A[2].  Continue  in  this  manner  for
+   the  first  n-1  elements  of  A.  Write  pseudocode  for  this  algorithm,  which  is
+   known  as  selection  sort.  Give  the  best-case  and  worst-case  running  times  of
+   selection sort in BigTheta-notation.
+
+ANSWER:
+Selection sort algorithm:
+For i = 1, 2, ... , n                           --> n times
+    For j = i+1, i+2, ..., n                    --> n-i times
+        if A[j] < smallest                      --> 1
+            smallest = A[j]                     --> 1
+            index = j                           --> 1
+    endif
+
+    temp = A[i]                                 --> 1
+    A[i] = smallest                             --> 1
+    A[index] = temp                             --> 1
+endif
+
+Best Case & Worst Case:
+n + n-1 + ... + 1 = 1 + 2 + ... + n
+n+1 + n+1 + ... + n+1 = n(n+1) --> n(n+1)/2 bc of cancellation addition
+
+The number of operations is (n(n+1))/2. This algorithm does not go any faster or slower than this regardless of input.
+
+
+
+4. Show that a depth-first search of an undirected graph G can be used to identify
+   the connected components of G, and that the depth-first forest contains as many
+   trees  as  G  has  connected  components.  More  precisely,  show  how  to  modify
+   depth-first search so that each vertex v is assigned an integer label cc[v] between
+   1 and k, where k is the number of connected components of G, such that cc[u] =
+   cc[v] if and only if u and v are in the same connected component.
+
+ANSWER:
+This question is asking us to show how to index each vertex in a graph uniquely using DFS. This can be done using
+a simple DFS recursion alg with a modification to index each vertex.
+
+DFSIndexing(graphVertex v, integerLabelsList cc, int counter=1, dfsTree T):
+    cc[v] = counter
+    counter++
+    add v to T
+    for each edge x adjacent to v:
+        if cc[x] is not already indexed:
+            DFSIndexing(x, cc, counter, T)
+        endif
+    endfor
+
+This method uniquely labels each vertex with a number 1 to k when the DFSIndexing method is called.
+This happens only once per index because of the check in the forLoop that prevents double indexing. The
+DFS forest contains as many trees as G has connected components for the same reason.
+
+
+
+5. Page 110: Problem 10
+    Suppose we are given an undirected graph G = (V, E), and we identify two nodes v
+    and w in G. Give an algorithm that computes the number of shortest v-w
+    paths in G. (The algorithm should not list all the paths; just the number
+    suffices.) The running time of your algorithm should be O(m + n) for a
+    graph with n nodes and m edges.
+
+    This problem can be solved by not marking off w as a visited node in the BFS algorithm. The BFS
+    will then generate a tree that will have multiple w node entries. Each time the algorithm spots a
+    w node at a certain depth, it will notify and count the number of  w nodes at that level of the BFS
+    tree.
+
+ANSWER:
+Pseudocode for the algorithm with global Q and L (level list) that assumes v!=destination:
+
+vwShortPaths(currentNode=v, destination, currentLevel):
+    for each node x adj to currentNode:
+        if x is not in visitedNodes:
+            add x to Q
+            add x to L[currentLevel + 1]                    # Maintain level list for reference at the end
+            if x is not destination:                        # Leave destination out of visited list
+                add x to visitedNodes
+
+    if Q.next is in L[currentLevel]:
+        vwShortPaths(Q.next, destination, currentLevel)
+    else if Q.next != null                                  # Moving on to new level (check if dest is in last level)
+        if L[currentLevel] contains destination:
+            return occurrences of destination in L[currentLevel]
+        vwShortPaths(Q.next, destination, currentLevel+1)
+    return -1
+
+This algorithm maintains a Q with the future nodes to visit and an L list of all the nodes in each row. Once
+a row is completed (with the current shortest paths all present), the row is searched for the destination and
+returns the number of shortest paths found to the destination. If the destination is never found the algorithm
+returns -1. This algorithm runs in O(n + m) time because each node that is not the destination is visited at
+most once, and the destination is visited n=length(Adj[destination]) in the worst case. The algorithm will
+usually end early by finding a level with the destination in it.
+
+
+
+6. Page 112: Problem 12
+    You’re helping a group of ethnographers analyze some oral history data
+    they’ve collected by interviewing members of a village to learn about the
+    lives of people who’ve lived there over the past two hundred years.
+    From these interviews, they’ve learned about a set of n people (all
+    of them now deceased), whom we’ll denote P1, P2,..., Pn. They’ve also
+    collected facts about when these people lived relative to one another.
+
+    Each fact has one of the following two forms:
+        . For some i and j, person Pi died before person Pj was born; or
+        . for some i and j, the life spans of Pi and Pj overlapped at least partially.
+
+    Naturally, they’re not sure that all these facts are correct; memories
+    are not so good, and a lot of this was passed down by word of mouth. So
+    what they’d like you to determine is whether the data they’ve collected is
+    at least internally consistent, in the sense that there could have existed a
+    set of people for which all the facts they’ve learned simultaneously hold.
+
+    Give an efficient algorithm to do this: either it should produce proposed dates
+    of birth and death for each of the n people so that all the facts
+    hold true, or it should report (correctly) that no such dates can exist—that
+    is, the facts collected by the ethnographers are not internally consistent.
+
+ANSWER:
+One way to solve this problem is to run a modified topological sort on the list of hard information
+(i.e. Pi died before Pj was born type information) to check if the data is consistent. If it is,
+the topological sort will not find any cycles, and will return lists of all the P nodes that have
+zero parents at a given time. Of these lists, the oldest people will be in the first list, and
+the youngest people will be in the last list. With these lists, we can propose ranges of birth and
+death dates for each individual using the second type of information (i.e. Pi and Pj's lives overlapped).
+
+Here is pseudocode for this algorithm:
+
+sortAges(typeAFacts, typeBFacts, listOfPeople):
+    graph = build graph using typeAFacts and listOfPeople          # Builds DAG if consistent
+    lists = topologicalSort(graph)                                 # Checks if DAG and returns multiple lists
+    if lists is empty:                                             # If lists are empty then not consistent
+        return false
+    lists.sortEachByTypeBFacts()                                   # Put people w/ typeBFacts last in the list
+    for list in lists:                                             # Print out peoples proposed ages using some info
+        print each person with no typeBFacts as oldest             # More likely to be old if they don't overlap with young
+        print each person with typeBFacts as living between previous people and newer people
+
+    for people not in lists:                                       # Occurs if only typeBFacts are available
+        print age as similar to person that typeBFacts says overlaps
+
+This algorithm will have mixed results depending on the amount of data collected by the ethnographers. If there
+is a lot of data, the problem is well-defined and a solid structure can be placed on the ordering of people's lives.
+If there is not a lot of data, there are too few constraints to use and only a weak ordering can be established.
+Additional information, such as dates of births and deaths for specific people, could be incorporated into this
+algorithm to give even better accuracy.
+
+Modified top sort:
+
+topologicalSort(graph):                                            # Modified version of what is in class notes
+    Queue q(NUM_VERTICES)
+    Queue q2(NUM_VERTICES)
+    List[] lists
+    int counter = 0
+    int checkCounter = 0
+    Vertex v, w
+    q.makeEmpty()
+
+    for each vertex v:
+        if v.indegree == 0:
+            q2.enqueue(v)
+            lists[counter].add(v)
+
+    while !q2.isEmpty():
+        v = q2.dequeue()
+        v.topNum = ++checkCounter;
+        for each w adjacent to v
+           if --w.indegree == 0:
+               q.enqueue(w)                                         # Add to buffer queue
+        if q2.isEmpty():
+            counter++
+            while !q.isEmpty():                                    # Empty buffer queue
+                w = q.dequeue()
+                list[counter].add(w)
+                q2.enqueue(w)
+
+    if counter != NUM_VERTICES:
+        return null
+    else
+        return lists
+
+This modified topological sort algorithm uses a secondary queue buffer so that the nodes that have zero parents
+are cleared all at 'one time'. After one set is all cleared, the next set is put into a new list and then taken
+from the buffer queue into the working queue. This behavior is desirable because in the context of this problem
+because we do not want a single list to contain any two people that lived in completely separated times. For
+example, in the first list we might have P1, P3, P4. From the algorithm above, we know that a direct ordering
+cannot be placed on the people based only on typeAFacts.
+
+
+
+
+Bonus Problems:
+
+(a) Describe (in words and pseudocode) a monitoring algorithm, which does the
+    following. As input, it is given an undirected graph G = (V, E) representing
+    the current network, in adjacency list format. It should output a Boolean
+    saying whether or not G is connected. Your algorithm should run in time
+    O(V + E).
+
+ANSWER:
+This problem can be solved using a simple DFS that keeps track of the number of nodes that
+it has visited. If the number of nodes visited is the same as the number of nodes in G, then
+the graph is connected. This works starting from any node and runs in the same time as DFS,
+O(V+E).
+
+Pseudocode:
+isConnected(G):
+    v = G[0]
+    if DFS(v) == G.length:
+        return true
+    else:
+        return false
+
+DFS(vertex v, count=0):
+    mark v visited
+    count++
+    for x in Adj[v]:
+        if x is not visited:
+            DFS(v, count)
+    return count
+
+
+(b) It is very nice if the network is connected, but even if it is, we might worry
+    that it might become disconnected soon. This is likely if the network graph
+    has critical vertices, whose removal would disconnect the graph. That is, u
+    is a critical vertex exactly if there are two other vertices, v and w, for which
+    every connecting path in the graph runs through u (this is equivalent to
+    saying that removing u disconnects the graph, because removing u leaves no
+    path from v to w.)
+
+    Describe (in words and pseudocode) a new monitoring algorithm, which
+    does the following. As input, it is given a connected undirected graph G =
+    (V, E) representing the current network, in adjacency list format. It should
+    output a list of all the critical vertices of the graph. Your algorithm should
+    have polynomial running time.
+
+ANSWER:
+Critical vertices can be found in polynomial time by removing one node at a time from the graph
+and running DFS or BFS on the remaining subgraph to examine the number of connected vertices in
+the subgraph. If the subgraph is connected with n-1 vertices, the node that was removed is not a
+critical vertex. Otherwise, it is and should be stored. Because this algorithm performs DFS, a
+O(V+E) algorithm, V times, the running time of this algorithm is O(V^2 + V*E) polynomial.
+
+Pseudocode assuming G is adjacency list graph:
+findCritical(G):
+    for vertex in G:
+        if DFS(G.excluding(vertex)) != G.length-1:
+                add vertex to criticalList
+    return criticalList
+
+DFS(vertex v, count=0):
+    mark v visited
+    count++
+    for x in Adj[v]:
+        if x is not visited:
+            DFS(v, count)
+    return count
