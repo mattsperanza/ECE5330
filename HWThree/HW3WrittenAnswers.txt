@@ -1,0 +1,148 @@
+Page 189: Problem 2
+For each of the following two statements, decide whether it is true or false.
+If it is true, give a short explanation. If it is false, give a counterexample.
+    (a) Suppose we are given an instance of the Minimum Spanning Tree
+    Problem on a graph G, with edge costs that are all positive and
+    distinct. Let T be a minimum spanning tree for this instance. Now
+    suppose we replace each edge cost ce by its square, c2
+    e, thereby creating a new instance of the problem with the same graph
+    but different costs.
+        True or false? T must still be a minimum spanning tree for this
+        new instance.
+
+True. Because all edge costs are positive, there will be no negative weights switching to positive. Additionally,
+because x^2 is an increasing function and the minimum spanning tree contains all the shortest paths between two nodes,
+there will never be a situation in which f(x) > f(x+1) when f(x) = x^2 and all values are positive.
+
+    (b) Suppose we are given an instance of the Shortest s-t Path Problem
+    on a directed graph G. We assume that all edge costs are positive
+    and distinct. Let P be a minimum-cost s-t path for this instance.
+    Now suppose we replace each edge cost ce by its square, c2
+    e, thereby creating a new instance of the problem with the same graph
+    but different costs.
+        True or false? P must still be a minimum-cost s-t path for this
+        new instance.
+
+False. Consider two paths between s and t, one with 5 edges with weight 1, and another with 2 edges with weight two.
+Prior to replacing each edge with its square, the latter path would be shorter. After replacing, the former path would
+be shorter.
+
+
+
+Page 199: Problem 20
+Given that they’re going to maintain this key property, however, they
+otherwise want to keep as few roads clear as possible. One year, they hit
+upon the following conjecture:
+    The minimum spanning tree of G, with respect to the edge weights ae, is a
+    minimum-altitude connected subgraph.
+
+(In an earlier problem, we claimed that there is a unique minimum spanning tree
+when the edge weights are distinct. Thus, thanks to the assumption that all ae
+are distinct, it is okay for us to speak of the minimum spanning tree.)
+
+Initially, this conjecture is somewhat counterintuitive, since the minimum spanning
+tree is trying to minimize the sum of the values ae, while the goal of minimizing
+altitude seems to be asking for a fairly different thing. But lacking an argument
+to the contrary, they begin considering an even bolder second conjecture:
+    A subgraph (V, E) is a minimum-altitude connected subgraph if and only if
+    it contains the edges of the minimum spanning tree.
+
+Note that this second conjecture would immediately imply the first one,
+since a minimum spanning tree contains its own edges.
+    So here’s the question.
+    (a) Is the first conjecture true, for all choices of G and distinct altitudes
+    ae? Give a proof or a counterexample with explanation.
+
+This first conjecture is true:
+Minimizing the sum of edge values is essentially the same problem as minimizing the altitude when the sum
+of the edge values are minimized on an edge to edge basis. Choosing a non-minimal altitude at any one step
+may result in a higher altitude path overall.
+
+The minimum height path from any town i will always take the lowest path out of the town that is connected
+to a new destination without backtracking. From this next town i+1, the minimum height path will again take
+the lowest path out of the town that leads to other towns, since any choice of a higher path may result in a
+higher maximum path height between towns i and j. Because the minimum height path always chooses the lowest
+path out of the visited towns, this problem satisfies the optimal substructure property of a minimum spanning
+tree. This means that the algorithm for finding the minimum-altitude subgraph is the same as the algorithm
+for finding the MST, meaning the minimum-altitude subgraph will be the same as the MST.
+
+
+    (b) Is the second conjecture true, for all choices of G and distinct altitudes ae?
+    Give a proof or a counterexample with explanation.
+
+The second conjecture is true:
+Assume a minimum altitude subgraph, A, which is not the minimum spanning tree, T, of a graph, G.
+Because A != T, there exists minimum altitude paths between towns i and j in A with a maximum height
+H which is < the corresponding height between the towns i and j in T, H0. Considering every connected
+path between adjacent nodes, assuming H < H0, implies that at some point H0 is not choosing the minimum
+path between adjacent nodes. This is a contridiction, since the MST always chooses the minimum path between
+adjacent nodes.
+
+
+
+4. Properties of Dijkstra’s Algorithm
+We assume that G = (V, E) is a weighted directed graph, and s  ∈ V is a designated
+source  node.  Denote  by  𝛿(𝑢)  the  minimum  distance  from  s  to  u  in  the  graph
+(measured in terms of the sum of edge weights).
+
+At  any  point  in  an  execution  of  Dijkstra’s  algorithm  between  iterations  of  the
+main  loop,  we  define  S  to  be  the  subset  of  V  consisting  of  the  nodes  that  have
+already been processed, and Q = V – S. For any node u, d[u] is the shortest path
+estimate of u, that is, the minimum weight of a path from s to u in which all nodes,
+except possibly the final node u, are in S. Prove the following two properties:
+    (a) After any number of iterations of the main loop, if u is any node in V, then
+    d[u] ≥ 𝛿(𝑢).
+
+Because d[u] is the shortest path estimate for a node u, d[u] = 𝛿(𝑢) after the node has been processed and the minimum
+path is known. Therefore, d[u] is never < 𝛿(𝑢) because 𝛿(𝑢) is the true shortest path. Prior to being processed,
+d[u] = 𝛿(v) + w(v, u). If v is not part of the minimum path to u, this implies d[u] ≥ 𝛿(𝑢), since 𝛿(𝑢) != 𝛿(v) + w(v, u)
+and d[u] is never < 𝛿(𝑢).
+
+    (b) After any number of iterations of the main loop, if u ∈ S and v ∈ Q, then 𝛿(𝑢) ≤ 𝛿(𝑣)
+
+Because v has yet to have been processed, the current shortest path estimate d[v] ≥ 𝛿(v) as shown above. If v is about
+to be processed d[v] = 𝛿(w) + weight(w, v) = 𝛿(v). There exists a situation when 𝛿(𝑢) = 𝛿(w) + weight(w, u) and
+weight(w, u) and weight(w, v) are identical. In this situation, 𝛿(𝑢) = 𝛿(𝑣). If in this same situation,
+weight(w, u) > weight(w, v), this would contradict Dijkstra's algorithm and would never be the case, implying
+𝛿(𝑢) is never > 𝛿(𝑣). If weight(w, u) < weight(w, v), then 𝛿(𝑢) ≤ 𝛿(𝑣). Because Dijkstra's algorithm finds the shortest
+paths first, all other paths to v must be longer than paths to u because u ∈ S and v ∈ Q.
+
+5. Consider the selecting breakpoints problem discussed in our class.
+    (a) Prove that the problem has optimal substructure.
+
+Consider setting breakpoints evenly spaced out at distances equal to the maximum distance able to be
+traveled at one time C. Now consider infinately many breakpoints between each multiple n of C. For any
+breakpoint B < C, (n-1)C + B < nC, and any ((n-1)C+B)+C < (n+1)C. This means that any choice of B < C
+could also be reached by choosing B=C. Now consider the subproblem of a trip of length C. Any choice other
+than C will result in more stops being taken then what is required. The next subproblem from C to 2C can be
+considered in the same way, thus showing optimal substructure.
+
+    (b)  In  class,  we  prove  the  greedy  algorithm  is  correct  using  the  "greedy  stays
+    ahead" argument. In this exercise, you are asked to use exchange arguments
+    to show that a greedy choice is used in some optimal solution.
+
+Assume an optimal path with intervals given by the vector Fn. Now for any interval in Fn, exchange an element
+fa for a non-greedy choice of this element and reevaluate the rest of the vector. If a = n and fn = C, the
+non-greedy choice fa would require an additional step, since fa < fn for any non-greedy choice. Any choice of
+interval a and any non-greedy choice of fa could only result in additional steps being required.
+
+6. Consider the problem of making change for n cents using the fewest number of
+coins. Assume that each coin’s value is an integer. Describe  a  greedy  algorithm
+to  make  change  consisting  of  quarters,  dimes,  nickels,  and  pennies.  Prove  that
+your algorithm yields an optimal solution.
+
+makeChange(n):
+    changeValues(25, 10, 5, 1)
+    changeBucket(4)
+
+    for each quant in changeValues:
+        if n // quant != 0:
+            changeBucket[0] += n // quant
+            n -= quant * n // quant
+
+This algorithm takes the most amount of large cent peices it can out of the total at any given step.
+
+This algorithm is optimal in this situation because each of the larger coins can be made up from a sum of
+each of the smaller coins. This means that at every step, it is always more efficient to take out the largest
+amount possible with the largest coin denomination, since any other choice is a sum of a larger number of smaller
+coins.

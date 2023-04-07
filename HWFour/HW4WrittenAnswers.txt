@@ -1,0 +1,210 @@
+2. Given a sequence of n word lengths, w1, w2, ..., wn, representing the lengths of words
+that make up a paragraph, and a line width W. We assume that each wi includes one
+space at the end of the word in its count (i.e., for “the”, w would be 4), and that W
+includes one extra space at the end of the line (i.e., for an actual line width of 80,
+specify W = 81). The basic constraint on word placement is that, if word i through j are
+placed on a single line, then wi + ... + wj <= W. In this case the number of extra spaces
+is
+X = W – (wi + ... + wj).
+The penalty for extra spaces in a line is assumed to be X^3. There is no penalty for extra
+spaces on the last line of the paragraph. The penalty for the paragraph is the sum of the
+penalties for individual lines. The problem is to break the n words into lines such that the
+penalty for the paragraph is minimized (note that you cannot change the order of the n
+words).
+
+For example, assume a paragraph consists of the following words:
+i 1 2 3 4 5 6 7 8 9 10 11
+wi 6 4 7 9 4 5 4 10 3 7 4
+Suppose W =17. The following is a way to break the words with a total penalty of 640.
+Words (1,2,3) (4,5) (6,7) (8,9) (10,11)
+X 0 4 8 4 0
+Penalty 0 64 512 64 0
+The problem is to find an optimal way to break the words into lines with a minimum total
+penalty.
+
+
+An approach to this problem would be to use dynamic programming. The idea is to choose
+the optimal path from all possible combinations of breakpoints. To try all possible combinations,
+we will have a word i to choose as the first breakpoint that fits under the character word limit W.
+We choose this i as the first line and consider the rest of the words to be a sub-problem, otherwise we skip
+this i in favor of another breakpoint later on. The solution of this problem can be seen as the minimum
+choice of i for all sub-problems starting at i=0. This is given by:
+
+Opt(i) = {
+    penalty(i) if i=n
+    min{opt(i+1) + penalty(start or last breakpoint,i), opt(i+1)}
+}
+
+Starting from i=0 for the entire problem would attempt all possible combinations of solutions
+and would be extremely inefficient. To efficiently solve this problem, we choose a base case of
+a known solution, opt(i) for i = n. We then consider the problem opt(i) for i = n-1, n, of which the
+solution is simple to calculate. Starting from the end simplifies the algorithm and allows us to take
+advantage of memoization and criterion in which potential solutions can be eliminated.
+
+
+3. Mike learns the greedy algorithm for solving the selecting breakpoints problem (we also
+studied it in our class). However, he is tired of proving the greedy choice property. Would
+you please help him design a dynamic programming solution for solving the problem?
+You need to specify the sub-problems, recursive formulation, and the base cases. You also
+need to analyze the running time of your algorithm.
+
+
+breakpoint i
+points b1 < b2 < ... bn = target
+maximum distance we can travel is D
+
+In this problem, we can find optimal breakpoints by trying all combinations of breakpoints and
+choosing the best one. This solution from some breakpoint i to n would look like:
+
+Opt(i)= {
+    0 if i=n,
+    min{opt(i+1) + 1, opt(i+1)}
+}
+
+This structure will try all combination of paths to bn if it starts at i=0. Like in the last problem,
+this would be inefficient and the algorithm should start from the end so that the early problems are trivial
+and the rest of the algorithm can make use of combinations of those trivial solutions.
+
+The sub-problem when evaluating a potential breakpoint bk is the same evaluation from bk+1 to bn. The recursive
+formulation is given in the Opt(i) function above. If we store previous solutions, this problem runs in O(n)
+time because the cost does not change, so it will always be better to choose to skip if bk+1 is in range of
+the last breakpoint.
+
+
+4. A large collection of mobile wireless devices can naturally form a network
+in which the devices are the nodes, and two devices x and y are connected
+by an edge if they are able to directly communicate with each other (e.g.,
+by a short-range radio link). Such a network of wireless devices is a highly
+dynamic object, in which edges can appear and disappear over time as
+the devices move around. For instance, an edge (x, y) might disappear as x
+and y move far apart from each other and lose the ability to communicate
+directly.
+In a network that changes over time, it is natural to look for efficient
+ways of maintaining a path between certain designated nodes. There are
+two opposing concerns in maintaining such a path: we want paths that are
+short, but we also do not want to have to change the path frequently as the
+network structure changes. (That is, we’d like a single path to continue
+working, if possible, even as the network gains and loses edges.) Here is
+a way we might model this problem.
+Suppose we have a set of mobile nodes V, and at a particular point in
+time there is a set E0 of edges among these nodes. As the nodes move, the
+set of edges changes from E0 to E1, then to E2, then to E3, and so on, to an
+edge set Eb. For i = 0, 1, 2, . . . , b, let Gi denote the graph (V, Ei). So if we were
+to watch the structure of the network on the nodes V as a “time lapse,” it
+would look precisely like the sequence of graphs G0, G1, G2,..., Gb−1, Gb.
+We will assume that each of these graphs Gi is connected.
+Now consider two particular nodes s, t ∈ V. For an s-t path P in one
+of the graphs Gi, we define the length of P to be simply the number of
+edges in P, and we denote this l(P). Our goal is to produce a sequence of
+paths P0, P1,..., Pb so that for each i, Pi is an s-t path in Gi. We want the
+paths to be relatively short. We also do not want there to be too many
+changes—points at which the identity of the path switches. Formally, we
+define changes(P0, P1,..., Pb) to be the number of indices i (0 ≤ i ≤ b − 1)
+for which Pi != Pi+1.
+Fix a constant K > 0. We define the cost of the sequence of paths
+P0, P1,..., Pb to be
+cost(P0, P1,..., Pb) = SUM over(i, to b, ((Pi) + K · changes(P0, P1,..., Pb)))
+
+(a) Suppose it is possible to choose a single path P that is an s-t path in
+each of the graphs G0, G1,..., Gb. Give a polynomial-time algorithm
+to find the shortest such path.
+
+
+If it is possible to find a single path P that works on all graphs G0, G1, ... Gb, it
+will be a path that spans the common edges in G0, G1, ... Gb. We need to compute a graph,
+Gc --> graph common, that connects the graph and does not break between Gn and Gn+1. This is
+the identity graph and can be found by comparing every subsequent graph. With this graph,
+we should then average over the G0, ... Gb's edges. We can then run BFS to find the best
+s-t path in G0, ... Gb.
+
+Generating the graph identity is O(b*E) (comparing an each array (length b) of edges), and so is the edge
+weight averaging. Running BFS is linear - O(V+E). The overall time for this would be O(bE)
+
+
+(b) Give a polynomial-time algorithm to find a sequence of paths
+P0, P1,..., Pb of minimum cost, where Pi is an s-t path in Gi for
+i = 0, 1, . . . , b.
+
+cost(P0, P1,..., Pb) = SUM(i to b){l(Pi) + K·changes(P0, P1,..., Pb))}
+
+In this problem, we need to find the best possible way to assign paths such that the paths
+change as infrequently as possible. We also want these paths to be as short as possible. This
+can be done by finding the longest stretches of graphs that have a short identity path. This
+can be thought of as choosing a set best graph indices or breakpoints. This can be tested by
+using the algorithm in part A on subsets of the total graph set. This optimization of index choices
+is written as:
+
+Opt(i,k) = { # k is index of last break
+    partASolution(k, i).pathLength if i=b,
+    min{opt(i+1, i) + partASolution(k, i).pathLength + K, opt(i+1, k)}  # choose this break or skip this one
+}
+
+This algorithm finds the cost of all possible path lengths and breakpoints. As with all the problems
+in this homework, the simple recursive structure of this problem would have an extremely long runtime,
+but this can be significantly improved by solving sub-problems and building up from those solutions.
+The runtime of this program will be O(b^3(E)) in the worst cas since in runs the partASolution algorithm,
+which is O(b*E), b^2 times to compare each breakpoint. This can be seen because at every n, (n-1) breakpoints
+need to be evaluated with the O(b*E) algorithm (at some point --> should be precomputed).
+
+
+5. You are given two videos, each represented as a sequence of images. Both videos were
+taken of the same scene at roughly the same time period. Let X = {x1, x2, ..., xm} be one
+sequence of images and Y = {y1, y2, ..., yn} be the other. The cameras are not
+synchronized and may run at significantly different speeds. The objective is to assign each
+image of the X video sequence with its most similar image in the Y video sequence,
+subject to the constraint that the assignments are consistent in time.
+In order to determine how similar two images are, as part of the input, you may assume
+that you are given a table D[i, j] which contains a numeric dissimilarity value between
+these two images xi and yj . The lower D[i, j] is, the more similar the images are.
+An assignment of sequence X to sequence Y is a sequence of m indices A = <j1, j2, ..., jm>
+meaning that, for 1  i  m, image xi is assigned to image 𝑦𝑗𝑖
+. The cost of an assignment is
+a sum of the dissimilarities between the assigned images. That is,
+𝑐𝑜𝑠𝑡(𝐴) =𝑚
+∑𝑖 = 1
+𝐷[𝑖,𝑗𝑖].
+An assignment A is temporally consistent if ji  ji+1, for 1  i < m. In other words, if xi is
+assigned to some image 𝑦𝑗𝑖 then the next image in the sequence xi+1 must be assigned to
+an image appearing no earlier in the Y image sequence. We allow two images of X to be
+assigned to the same image of Y. The problem is: Given the video sequences X, Y and the
+cost table D[i, j], compute the minimum cost temporally consistent assignment of X to Y.
+Figure 1 shows a simple example.
+Figure 1: An example. The dissimilarity matrix is shown for the two sequences. The
+assignment <1, 3, 6> has a cost of D[1, 1] + D[2, 3] + D[3, 6] = 3 + 2 + 2 = 7.
+Develop an efficient dynamic programming based algorithm for the problem of computing
+the cost of the optimal temporally consistent assignment. What is the running time of your
+algorithm, as a function of m and n. You need to specify the subproblems, recursive
+formulation, and the base cases. You also need to analyze the running time of your
+algorithm.
+
+
+In this problem we are tasked with assigning all the images of a video X with the images of a video Y,
+where video Y is at least as long as video X, and multiple images of X can be assigned to a single frame
+of video Y. The cost of image pairs is given in D[i,j]. This can be broken down into sub-problems by
+assigning some xi to yj, and evaluating the rest of X (starting at xi+1) with Y (starting at yj). Another way to
+look at this would be to choose breakpoints, j, in video Y, where each breakpoint represents some xi. This solution
+can be written as:
+
+Opt(j, i=0) = {
+    D[i, k] if k=n and i=m,
+    (m-i) * D[i, k] if k=n,
+    min{opt(k, i+1) + D[i,k], opt(k+1, i)}
+}
+
+This algorithm chooses the min of choosing to skip the image j or choosing image j and evaluating with the next frame
+of X. One base case is when j=n, where the only choice will be the cost of D[i,j] * the # of X frames left. The other
+base case is when i=m and j=n, at which point the only option would be to assign i to j. Yet again, this should be
+solved by solving the sub-problems (small parts of Y) first, and using these solutions to calculate the larger
+sub-problems. This algorithm will loop over all images in the sub-problem n times in the total solution. This makes
+the algorithm O(n^2).
+
+
+
+
+
+
+
+
+
+
+
