@@ -160,7 +160,7 @@ public:
         nodes.at(nodeNumberTwo)->addAdjNode(nodes.at(nodeNumberOne), weight);
     }
 
-    void addEdgeDirected(int nodeNumberOne, int nodeNumberTwo, int weight) {
+    void addEdgeDirectedFromTo(int nodeNumberOne, int nodeNumberTwo, int weight) {
         nodes.at(nodeNumberOne)->addAdjNode(nodes.at(nodeNumberTwo), weight);
     }
 
@@ -392,7 +392,7 @@ int main(){
         int weight = std::stoi(buffer);
 
         // Add edge to the graphUndirected
-        graphDirected->addEdgeDirected(nodeOne, nodeTwo, weight);
+        graphDirected->addEdgeDirectedFromTo(nodeOne, nodeTwo, weight);
     }
     // Close the file
     inFile.close();

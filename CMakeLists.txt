@@ -9,3 +9,5 @@ add_executable(ECE5330_HW3 HWThree/HW3.cpp HWThree/Graph.cpp HWThree/Node.cpp HW
         HWThree/NodeHeap.cpp HWThree/NodeHeap.h)
 
 add_executable(ECE5330_HW4 HWFour/HW4.cpp)
+
+add_executable(ECE5330_HW6 HWSix/HW6.cpp)

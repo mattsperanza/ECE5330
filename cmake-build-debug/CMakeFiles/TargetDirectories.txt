@@ -1,5 +1,6 @@
 /iahome/m/ms/msperanza/ECE5330/cmake-build-debug/CMakeFiles/ECE5330_HW1.dir
 /iahome/m/ms/msperanza/ECE5330/cmake-build-debug/CMakeFiles/ECE5330_HW3.dir
 /iahome/m/ms/msperanza/ECE5330/cmake-build-debug/CMakeFiles/ECE5330_HW4.dir
+/iahome/m/ms/msperanza/ECE5330/cmake-build-debug/CMakeFiles/ECE5330_HW6.dir
 /iahome/m/ms/msperanza/ECE5330/cmake-build-debug/CMakeFiles/edit_cache.dir
 /iahome/m/ms/msperanza/ECE5330/cmake-build-debug/CMakeFiles/rebuild_cache.dir
