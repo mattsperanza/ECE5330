@@ -1,4 +1,5 @@
 #include <iostream>
+#include <utility>
 #include <vector>
 #include <list>
 #include <cstdint>
@@ -17,15 +18,17 @@ public:
 
     ~Node()
     {
-        for(int i = 0; i < numberOfAdjNode; i++) {delete adjNodes.at(i);}
         this->adjNodes.clear();
         this->weights.clear();
     }
 
     std::vector<Node*> getAdjNodes() {return adjNodes;}
     std::vector<int> getWeights() {return weights;}
+    void setWeights(std::vector<int> newWeights) {this->weights = std::move(newWeights);}
+    void setWeight(int index, int value) {this->weights[index] = value;}
+    void setAdjNodes(std::vector<Node*> newNodes) { this->adjNodes = newNodes; }
     [[nodiscard]] int getDistance() const {return distance; }
-    [[nodiscard]] int getNumberOfAdjNodes() const {return numberOfAdjNode;}
+    [[nodiscard]] int getNumberOfAdjNodes() const {return adjNodes.size();}
     [[nodiscard]] int getNodeNumber() const {return nodeNumber;}
     Node* getClosestNode() { return this->closestNode;}
 
@@ -50,17 +53,8 @@ public:
         weights.erase(weights.begin()+index);
     }
 
-    static bool isDifferent(Node* n1, Node* n2){
-        bool different = true;
-        different = n1->getNodeNumber() == n2->getNodeNumber() && n1->
-        return different;
-    }
-
-    Node *copy(){
-        auto* copy = new Node(this->getNodeNumber(), this->getAdjNodes().size());
-        copy->setDistance(this->getDistance(), nullptr);
-        return copy;
-    };
+    void setLoad(int i){this->load = i;}
+    [[nodiscard]] int getLoad() const {return this->load;}
 
 private:
     int nodeNumber = 0;
@@ -171,12 +165,17 @@ class Graph
 {
 public:
     explicit Graph() = default;
+    explicit Graph(std::vector<Node*> nodes){ this->nodes = std::move(nodes); }
 
     ~Graph()
     {
-        for(auto & node : nodes) {delete node;}
+        for(auto* node : nodes) {delete node;}
+        for(auto* node: savedState) { delete node; }
         nodes.clear();
+        savedState.clear();
     }
+
+    std::vector<Node*> getNodes() {return nodes;}
 
     void addNode(int nodeNumberOne)
     {
@@ -201,6 +200,26 @@ public:
         nodes.at(nodeNumberOne)->removeAdjNode(nodes.at(nodeNumberTwo));
     }
 
+    void saveState(){
+        for(int i = 0; i < this->nodes.size(); i++){
+            Node* current = nodes[i];
+            Node* newNode = new Node(i, current->getNumberOfAdjNodes());
+            this->savedState.push_back(newNode);
+            newNode->setWeights(current->getWeights());
+            newNode->setAdjNodes(current->getAdjNodes());
+        }
+        for(auto current : this->savedState)
+        {
+            auto* newAdjNodes = new std::vector<Node*>();
+            for(int j = current->getAdjNodes().size()-1; j >= 0; j--)
+            {
+                int nodeNum = current->getAdjNodes()[j]->getNodeNumber();
+                newAdjNodes->push_back(this->savedState[nodeNum]);
+            }
+            current->setAdjNodes(*newAdjNodes);
+        }
+    }
+
     // Returns a path in reverse order <sinkNode, ..., sourceNode>
     static std::vector<Node*>* BFS(Graph* G, Node* sourceNode, Node* sinkNode){
         if(sourceNode == nullptr || sinkNode == nullptr){
@@ -214,13 +233,16 @@ public:
         visited[0] = true;
 
         while(!remaining->empty()){
-            Node current = *remaining->front();
-            for(Node* n: current.getAdjNodes()){
-                if(n == sinkNode){
-                    n->setDistance(n->getDistance(), &current);
+            Node* current = remaining->front();
+            std::vector<Node*> adjNodes = current->getAdjNodes();
+            for(int i = 0; i < adjNodes.size(); i++){
+                if(adjNodes[i] == sinkNode){
+                    adjNodes[i]->setDistance(current->getWeights()[i], current);
                     // Create short path list
                     auto* path = new std::vector<Node*>;
-                    Node* back = n->getClosestNode();
+                    path->push_back(sinkNode);
+                    Node* back = adjNodes[i]->getClosestNode();
+                    assert(back == current);
                     path->push_back(back);
                     while(back->getClosestNode() != nullptr){
                         back = back->getClosestNode();
@@ -228,13 +250,13 @@ public:
                     }
                     return path; // Path is in revers order in the vector
                 }
-                if(!visited[n->getNodeNumber()]) {
-                    n->setDistance(n->getDistance(), &current);
-                    remaining->push_back(n);
-                    visited[n->getNodeNumber()] = true;
+                if(!visited[adjNodes[i]->getNodeNumber()]) {
+                    adjNodes[i]->setDistance(current->getWeights()[i], current);
+                    remaining->push_back(adjNodes[i]);
+                    visited[adjNodes[i]->getNodeNumber()] = true;
                 }
             }
-            remaining->pop_front();
+            remaining->remove(remaining->front());
         }
 
         auto* failed = new std::vector<Node*>;
@@ -254,15 +276,16 @@ public:
         visited[sourceNode->getNodeNumber()] = true;
 
         while(!remaining->empty()){
-            Node current = *remaining->front();
-            for(Node* n: current.getAdjNodes()){
-                if(!visited[n->getNodeNumber()]) {
-                    n->setDistance(n->getDistance(), &current);
-                    remaining->push_back(n);
-                    visited[n->getNodeNumber()] = true;
+            Node* current = remaining->front();
+            std::vector<Node*> adjNodes = current->getAdjNodes();
+            for(int i = 0; i < adjNodes.size(); i++){
+                if(!visited[adjNodes[i]->getNodeNumber()]) {
+                    adjNodes[i]->setDistance(current->getWeights()[i], current);
+                    remaining->push_back(adjNodes[i]);
+                    visited[adjNodes[i]->getNodeNumber()] = true;
                 }
             }
-            remaining->pop_front();
+            remaining->remove(remaining->front());
         }
 
         auto* visitTree = new std::vector<Node*>;
@@ -274,53 +297,32 @@ public:
         return visitTree;
     }
 
-    static bool isDifferent(Graph* G, Graph* L){
-        bool different = true;
-        if(G->nodes.size() != L->nodes.size()){
-            return false;
-        }
-        int counter = 0;
-        for(int i = 0; i < G->nodes.size(); i++){
-            if(!Node::isDifferent(G->nodes[i], L->nodes[i]))
-            {
-                counter++;
-            }
-        }
-        if(counter == G->nodes.size()-1)
-        {
-            different = false;
-        }
+    static std::vector<Node*> getFlow(std::vector<Node *> initialNet, std::vector<Node *> residualNet) {
+        for(auto* node: initialNet){
+            int nodeNum1 = node->getNodeNumber();
+            for(int i = 0; i< node->getAdjNodes().size(); i++){
+                int nodeNum2 = node->getAdjNodes()[i]->getNodeNumber();
+                for(int j = 0; j < residualNet[nodeNum2]->getAdjNodes().size(); j++)
+                {
+                    if(residualNet[nodeNum2]->getAdjNodes()[j]->getNodeNumber() == nodeNum1){
+                        int reverseWeight = residualNet[nodeNum2]->getWeights()[j];
+                        node->setWeight(i, reverseWeight);
+                        break; // Found self, now look at other adj nodes
+                    }
+                }
+            } // Looked through all adj nodes and assigned weights
+        } // Looked through all nodes in G
 
-        return different;
+        return initialNet;
     }
 
-    Graph* deepCopy(){
-        auto* copy = new Graph();
-        auto* listOfNodeNumbers = new std::vector<int>();
-        auto* listOfEdgeWeights = new std::vector<int>();
-        for(auto & node : this->nodes){
-            copy->addNode(node->copy());
-            for(int j = 0; j < node->getAdjNodes().size(); j++){
-                listOfNodeNumbers->push_back(node->getAdjNodes()[j]->getNodeNumber());
-                listOfEdgeWeights->push_back(node->getWeights()[j]);
-            }
-        }
-        int counter = 0;
-        for(auto & node : copy->nodes){
-            for(int j = 0; j < node->getNumberOfAdjNodes(); j++){
-                copy->addEdgeDirectedFromTo(node->getNodeNumber(), listOfNodeNumbers->at(counter), listOfEdgeWeights->at(counter));
-                counter++;
-            }
-        }
-        return copy;
-    }
-
-    static int fordFulkerson(Graph* G, Node* sourceNode, Node* sinkNode){
-        if (sourceNode == nullptr || sinkNode != nullptr || !G->nodes.empty()){
+    static std::vector<Node*> fordFulkerson(Graph* G, Node* sourceNode, Node* sinkNode){
+        if (sourceNode == nullptr || sinkNode == nullptr || G->nodes.empty()){
             std::cerr << "Error: Source/Sink/Graph invalid." << "\n";
+            return {}; // Return empty vector
         }
 
-        auto* originalGraph = G->deepCopy();
+        G->saveState();
         auto* path = BFS(G, sourceNode, sinkNode);
         while(!path->empty()){
             int pathFlow = INT32_MAX;
@@ -330,7 +332,7 @@ public:
                 }
             }
 
-            for(int i = 0; i < path->size()-1; i++)  // size-1 to avoid indexing errors
+            for(int i = 0; i < path->size()-1; i++)
             {
                 Node* nodeOne = path->at(i);
                 Node* nodeTwo = path->at(i+1);
@@ -349,20 +351,31 @@ public:
                     }
                 }
 
-                int flowFromTwo = nodeOne->getDistance();
+                int flowFromTwo = nodeTwo->getWeights()[twoToOneAdjNodeIndex];
                 if(flowFromTwo == pathFlow){  // Edge needs to be flipped
-                    G->removeEdgeFromTo(nodeTwo->getNodeNumber(), nodeOne->getNodeNumber());
-                    G->addEdgeDirectedFromTo(nodeOne->getNodeNumber(), nodeTwo->getNodeNumber(), pathFlow);
+                    if (oneToTwoAdjNodeIndex == -1) { // Edge doesn't exist
+                        G->removeEdgeFromTo(nodeTwo->getNodeNumber(), nodeOne->getNodeNumber());
+                        G->addEdgeDirectedFromTo(nodeOne->getNodeNumber(), nodeTwo->getNodeNumber(), pathFlow);
+                    }
+                    else{ // Edge exists
+                        nodeOne->setWeight(oneToTwoAdjNodeIndex, nodeOne->getWeights()[oneToTwoAdjNodeIndex] + pathFlow);
+                        G->removeEdgeFromTo(nodeTwo->getNodeNumber(), nodeOne->getNodeNumber());
+                    }
+                    assert(nodeOne->getClosestNode() == nodeTwo);
+                    nodeOne->setDistance(INT32_MAX, nullptr); // Closest node no longer known
                 }
                 else if(flowFromTwo > pathFlow){
                     if(oneToTwoAdjNodeIndex != -1){  // Shift flow from one edge to another
-                        nodeOne->getWeights()[oneToTwoAdjNodeIndex] += pathFlow;
-                        nodeTwo->getWeights()[twoToOneAdjNodeIndex] -= pathFlow;
+                        nodeOne->setWeight(oneToTwoAdjNodeIndex, nodeOne->getWeights()[oneToTwoAdjNodeIndex] + pathFlow);
+                        nodeTwo->setWeight(twoToOneAdjNodeIndex, nodeTwo->getWeights()[twoToOneAdjNodeIndex] - pathFlow);
                     }
                     else{  // Shift flow from one edge to a newly created edge
                         G->addEdgeDirectedFromTo(nodeOne->getNodeNumber(), nodeTwo->getNodeNumber(), pathFlow);
-                        nodeTwo->getWeights()[twoToOneAdjNodeIndex] -= pathFlow;
+                        nodeTwo->setWeight(twoToOneAdjNodeIndex, nodeTwo->getWeights()[twoToOneAdjNodeIndex] - pathFlow);
                     }
+                }
+                else{
+                    std::cerr << "Error: Flow from node " << nodeTwo->getNodeNumber() << " is less than path flow." << "\n";
                 }
             }
             path = BFS(G, sourceNode, sinkNode);
@@ -372,11 +385,19 @@ public:
         for (int f: sinkNode->getWeights()){
             flowValue += f;
         }
+        std::cout << "Total flow through the graph: " << flowValue << "\n";
 
         auto* minimumCut = BFSTree(G, sourceNode);
+        std::cout << "Minimum cut set S: ";
+        for (auto* n: *minimumCut){
+            std::cout << n->getNodeNumber() << " ";
+        }
+        std::cout << "\n";
 
+        //std::cout << "Residual Network (edges with zero weight don't exist): \n";
+        //std::cout << G->toString();
 
-        return flowValue;
+        return getFlow(G->savedState, G->nodes);
     }
 
     int dijkstras(int start, int end)
@@ -506,6 +527,21 @@ public:
         return output;
     }
 
+    std::string printFlow()
+    {
+        std::string output;
+        for(auto & node : nodes){
+            output += "Node " + std::to_string(node->getNodeNumber()) + " has " + std::to_string(node->getNumberOfAdjNodes()) + " adjacent nodes.\n";
+            for(int j = 0; j < node->getNumberOfAdjNodes(); j++){
+                output += std::to_string(node->getNodeNumber()) + "-->"
+                          + std::to_string(node->getAdjNodes().at(j)->getNodeNumber()) + " has a weight of " +
+                          std::to_string(node->getWeights().at(j)) + ".\n";
+            }
+            output += "\n";
+        }
+        return output;
+    }
+
     std::string toAdjacencyListString()
     {
         std::string output;
@@ -518,6 +554,8 @@ public:
         }
         return output;
     }
+
+
 
     static std::string printShortestPath(Node* node)
     {
@@ -539,13 +577,14 @@ public:
 
 private:
     std::vector<Node*> nodes;
+    std::vector<Node*> savedState;
 };
 
 int main(){
     std::cout << "HW6" << "\n";
     // Ask user for input file
     std::cout << "Please enter the name of the input file:\n";
-    std::string fileName;
+    std::string fileName; //= "sampleInput.txt";
     std::cin >> fileName;
 
     // Open the file
@@ -566,8 +605,13 @@ int main(){
     std::cout << "Number of nodes: " << buffer << std::endl;
     int numberOfNodes = std::stoi(buffer);
 
-    int sourceInt = 0;
-    int sinkInt = 7;
+    // Read in source and sink nodes from user
+    std::cout << "Please enter the source node:\n";
+    int sourceInt; //= 0;
+    std::cin >> sourceInt;
+    std::cout << "Please enter the sink node:\n";
+    int sinkInt; // = 7;
+    std::cin >> sinkInt;
 
     // Create graphDirected
     auto* graphDirected = new Graph();
@@ -592,11 +636,18 @@ int main(){
         // Add edge to the graphDirected
         graphDirected->addEdgeDirectedFromTo(nodeOne, nodeTwo, capacity);
     }
-
-
-
     // Close the file
     inFile.close();
+
+    // Print the source and sink node numbers
+    std::cout << "Ford-Fulkerson (technically is Edmonds-Karp because I use BFS): \n";
+    std::cout << "Source: " << sourceInt << "\nSink: " << sinkInt << "\n";
+
+    // Run Ford Fulkerson
+    std::vector<Node*> flow = Graph::fordFulkerson(graphDirected, graphDirected->getNodes().at(sourceInt),
+                                                           graphDirected->getNodes().at(sinkInt));
+    auto* graphFlow = new Graph(flow);
+    std::cout << "Graph Flow:\n" << graphFlow->toString() << std::endl;
 }
 
 

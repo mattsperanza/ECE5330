@@ -1,0 +1,119 @@
+2. Problem 3
+
+a) What is the value of this flow? Is this a maximum (s,t) flow in this graph?
+
+The value of this flow is 8+5+5=18. This is a maximum (s,t) flow in this graph since there are no
+augmenting paths.
+
+b) Find a minimum s-t cut in the flow network pictured in Figure 7.27, also say what its capacity is.
+
+The minimum s-t cut is {s, a, c} and {b, d, t}. The capacity is 5+5+1+3+1=15.
+
+
+3. Problem 5
+
+Decide whether the following statement is true or false. If it is true, give a short explanation.
+If it is false, give a counterexample.
+
+Statement: Let G be an arbitrary flow network, with a source s, and a sink t, and a positive integer capacity c on each edge e;
+and let (A,B) be a minimum s-t cut with respect to these capacities {c : e is and element of E}. Now suppose that we
+add 1 to every capacity; then (A,B) is still a minimum s-t cut with respect to these new capacities
+{c+1 : e is an element of E}.
+
+This question is essentially asking if adding 1 to every capacity in a flow network will change the minimum s-t cut.
+If we think about how this affects the Ford-Fulkerson algorithm, we can see that it could change the minimum s-t cut
+by considering an intermediate edge. If the edge normally has a capacity of 2, and is normally used in a path of size
+1 in the first augmenting path, and 1 in the second augmenting path, then the edge will be used in both augmenting
+paths. However, if we add 1 to the capacity, then the edge will be used in the first augmenting path, but will limit
+the second augmenting path, and this could change the minimum s-t cut.
+
+
+4. Problem 19
+
+a) Find a polynomial-time algorithm that implements this scheduling system.
+
+To find a list of doctors that can cover all the shifts and fits in their schedules, we can maintain
+an array for the number of doctors we want to be present and the given the doctor schedules. We can
+then iterate through each day to n and look through each doctor's schedule to see if they are available.
+If they are, we can add them to a list of doctors for that day. If, after looking through all the doctor's,
+schedules, we do not have enough doctors, we can return an empty list. Otherwise, we can return a list of
+the doctors that can work for each day. This isn't a fair system, but because we are only looping through
+lists of known size, this algorithm is polynomial time O(nk) --> loop through days, loop through doctor lists.
+We assume here that k <= n since that is a reasonable assumption.
+
+b) Find an algorithm that takes in an integer c > 0 that will assign doctors to at most c shifts that they
+are not available for.
+
+To find the shifts that every doctor must work, we can create a graph with a source s and a sink t. We can
+then create a node for each doctor and connect them to the source with an edge of capacity of infinity. Then,
+we can create a node for each day and connect each one to a sink with an edge capacity of p(i). We add an
+edge from each doctor to the days that they say they can work with an edge with capacity 1. We can then create
+a new node for each doctor with an edge from the doctor with capacity c and to each day with capacity inf. If we
+run the Ford-Fulkerson algorithm on this graph, we will find the maximum flow for a certain c. With this, we can
+find the shifts each doctor will have to work by looking at the outgoing edges from the doctor's corresponding node.
+If the flow out of each day is less than p(i), we know that c is insufficient to fully staff the hospital. Because
+Ford-Fulkerson is polynomial time, this algorithm is also polynomial time.
+
+
+5. Problem 50
+
+Consider a scheduling problem with m machines that can process jobs one at a time. The problem is to assign
+jobs to machines (each job needs to be assigned to exactly one machine) and order the jobs on the machines
+to minimize a cost function. The machines run at different speeds but the jobs are the same. There are n jobs
+with different levels of urgency. The schedule consists of jobs to machines, and on each machine there is an ordering
+in which the jobs will be completed.
+
+The cost of a schedule is Summation(across job j): CostOfJobInTime(j, TimeOfJobOnMachineSchedule(j, S)).
+
+We loop through the jobs, each time looking up the time until completion for the job on the machine it is assigned
+to.
+
+We can solve this problem by constructing a flow network with a source s and a sink t. We can then create a node for
+each job and connect it to the source with an edge of capacity 1. Each job will eventually be connected to one machine,
+so to minimize the cost we will process jobs in order of urgency. We can then create a node for each machine and add
+an edge with capacity inf from each job to every machine. We can then add an edge from each machine to a sink with
+edge capacities equal to the time it takes to process the job on that machine. We can then run a modified Ford-Fulkerson
+in which the edges from each machine to the sink grow by the time it take to process a job on that machine every time
+a job is assigned to that machine. This will give us the minimum cost for the schedule if we use a path finding algorithm
+that prioritizes jobs with higher urgency first then finds the shortest path. This algorithm is polynomial time because
+Ford-Fulkerson is polynomial time and there exists polynomial time algorithms for finding the shortest path.
+
+
+6. Problem 1 Chapter 8
+
+Answer "Yes", "No", or "Unknown, because it would resolve whether P = NP" to the following questions.
+
+a) Is it the case that Interval Scheduling <=p Vertex Cover?
+
+The question is asking if Interval Scheduling is NP-complete, and therefore there would exist a polynomial
+mapping from Vertex Cover to Interval Scheduling. This is not the case, so the answer is "No". We know from
+chapter four that there exists a polynomial time algorithm for finding the Interval Scheduling of >= k, so
+Interval Scheduling is in P.
+
+b) Is it the case that Independent Set <=p Interval Scheduling?
+
+Because our answer to a) is "No", and from the lecture slides in class we saw that Independent Set is NP-complete
+due to a mapping between 3-SAT and Independent Set, we know that Interval Scheduling is not NP-complete. Therefore,
+Interval Scheduling does not have a polynomial mapping to Independent Set. "No".
+
+
+Extra Credit:
+
+a) Give an efficient algorithm to find a minimum path cover of a directed acyclic graph G = (V,E).
+
+This problem can be solved using dynamic programming. We can consider the subproblem of finding the minimum path as:
+
+Opt(path for set s) = min{
+    Opt(p', s - v) + 1 if v is not in p',
+    Opt(p', s) if v is in p,
+    1 if s = v
+}
+
+We start with the base case of Opt(p, s) = 0 if s = 0. We can then iterate through the vertices in topological order,
+building up the sub-problems.
+
+b) Does your algorithm work for directed graphs that contain cycles? Explain.
+
+This algorithm would work for directed graphs with cycles, but it would not be efficent. It is hard to find a place
+to start with a general graph, so the number of combinations we would need to try would explode as we consider more
+vertices because it essentially makes the work we put into the dynamic programing sub-problem less effective.
